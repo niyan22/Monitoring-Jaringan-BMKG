@@ -27,8 +27,8 @@ Kalau hasilnya di bawah 8.4, ganti dulu versi PHP-nya (di Laragon: **Menu → PH
 ## 2. Clone Repo
 
 ```bash
-git clone https://github.com/niyan22/web-monitoring-jaringan-bmkg.git
-cd web-monitoring-jaringan-bmkg
+git clone https://github.com/niyan22/Monitoring-Jaringan-BMKG.git
+cd Monitoring-Jaringan-BMKG
 ```
 
 Kalau pakai Laragon, taruh hasil clone-nya di dalam `C:\Laragon\laragon\www\`, supaya Laragon otomatis membuatkan alamat lokal untuk proyek ini.
@@ -97,7 +97,7 @@ Pilih salah satu:
   Lalu buka `http://127.0.0.1:8000` di browser.
 
 - **Lewat Laragon** (kalau folder proyek ada di `www/`):
-  Buka `http://web-monitoring-jaringan-bmkg.test` di browser. Pastikan **Start All** sudah diklik di Laragon.
+  Buka `http://Monitoring-Jaringan-BMKG.test` di browser. Pastikan **Start All** sudah diklik di Laragon.
 
 ## Menjalankan Pengujian
 
