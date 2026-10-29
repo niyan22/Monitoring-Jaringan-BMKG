@@ -99,6 +99,18 @@ Pilih salah satu:
 - **Lewat Laragon** (kalau folder proyek ada di `www/`):
   Buka `http://web-monitoring-jaringan-bmkg.test` di browser. Pastikan **Start All** sudah diklik di Laragon.
 
+## Menjalankan Pengujian
+
+**Tes otomatis (aman untuk data):** memakai database SQLite sementara di memori, jadi `database.sqlite` Anda tidak tersentuh.
+
+```bash
+php artisan test
+```
+
+**Postman:** aplikasi ini tidak punya API token; autentikasinya memakai sesi login + CSRF. Import dua file di folder `docs/postman/` (koleksi dan environment), isi `email` dan `password` dengan akun uji, lalu jalankan folder **Auth** terlebih dulu (1. Ambil cookie CSRF, lalu 2. Login).
+
+> Request bertanda ⚠ di koleksi Postman menambah, mengubah, atau menghapus data **pada database yang dipakai server**. Backup `database/database.sqlite` dulu, atau jalankan server dengan database salinan.
+
 ## Masalah yang Sering Muncul
 
 - **Error `Class "Pdo\Mysql" not found` atau sejenisnya saat `php artisan` dijalankan.**

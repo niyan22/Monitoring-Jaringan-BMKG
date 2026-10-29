@@ -1,0 +1,317 @@
+{
+  "info": {
+    "name": "Web Monitoring Jaringan BMKG",
+    "description": "Koleksi uji untuk aplikasi Laravel ini. Aplikasi memakai SESSION LOGIN + CSRF (bukan token API).\n\nCara pakai:\n1. Import collection ini dan file environment (.postman_environment.json), lalu pilih environment tersebut.\n2. Isi variabel `email` dan `password` dengan akun UJI.\n3. Jalankan folder 'Auth' → '1. Ambil cookie CSRF' lalu '2. Login'.\n4. Request lain bisa dijalankan setelah login.\n\nPERINGATAN: request bertanda ⚠ mengubah/menghapus data pada database yang dipakai server. Gunakan salinan database (mis. DB_DATABASE ke file sqlite lain) atau backup dulu.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Laravel membaca token CSRF dari header X-XSRF-TOKEN (nilai cookie XSRF-TOKEN, di-decode).",
+          "const token = pm.cookies.get('XSRF-TOKEN');",
+          "if (token) {",
+          "  pm.request.headers.upsert({ key: 'X-XSRF-TOKEN', value: decodeURIComponent(token) });",
+          "}",
+          "// Minta respons JSON agar error validasi berupa 422, bukan redirect HTML.",
+          "pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });",
+          "pm.request.headers.upsert({ key: 'X-Requested-With', value: 'XMLHttpRequest' });"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Ambil cookie CSRF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/login", "host": ["{{baseUrl}}"], "path": ["login"] },
+            "description": "Wajib dijalankan pertama agar cookie XSRF-TOKEN dan sesi tersimpan di Postman."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cookie XSRF-TOKEN diterima', () => pm.expect(pm.cookies.get('XSRF-TOKEN')).to.be.ok);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "email", "value": "{{email}}", "type": "text" },
+                { "key": "password", "value": "{{password}}", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/login", "host": ["{{baseUrl}}"], "path": ["login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login berhasil (200/204/302)', () => pm.expect(pm.response.code).to.be.oneOf([200, 204, 302]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Akses tanpa login ditolak (uji keamanan)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/system/latest-json", "host": ["{{baseUrl}}"], "path": ["system", "latest-json"] },
+            "description": "Jalankan SEBELUM login (atau setelah logout). Harus 401, bukan data."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Tanpa login → 401/302', () => pm.expect(pm.response.code).to.be.oneOf([401, 302]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/logout", "host": ["{{baseUrl}}"], "path": ["logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Data terbaru (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/system/latest-json", "host": ["{{baseUrl}}"], "path": ["system", "latest-json"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ada field success', () => pm.expect(pm.response.json()).to.have.property('success'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "⚠ Tambah data sistem",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "cpu_load", "value": "45.5", "type": "text" },
+                { "key": "memory_used", "value": "4", "type": "text" },
+                { "key": "memory_total", "value": "16", "type": "text" },
+                { "key": "disk_used", "value": "100", "type": "text" },
+                { "key": "disk_total", "value": "500", "type": "text" },
+                { "key": "processor_name", "value": "Postman Test CPU", "type": "text" },
+                { "key": "processor_cores", "value": "4", "type": "text" },
+                { "key": "processor_frequency", "value": "3.2", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/system", "host": ["{{baseUrl}}"], "path": ["system"] },
+            "description": "Menambah 1 baris ke tabel system_metrics."
+          }
+        },
+        {
+          "name": "Tambah data sistem — input tidak valid (harus 422)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "cpu_load", "value": "150", "type": "text" },
+                { "key": "processor_cores", "value": "0", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/system", "host": ["{{baseUrl}}"], "path": ["system"] },
+            "description": "Validasi menolak input; tidak ada data yang disimpan."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validasi menolak (422)', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "⚠ Ubah data sistem (isi id)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "cpu_load", "value": "10", "type": "text" },
+                { "key": "memory_used", "value": "4", "type": "text" },
+                { "key": "memory_total", "value": "16", "type": "text" },
+                { "key": "disk_used", "value": "100", "type": "text" },
+                { "key": "disk_total", "value": "500", "type": "text" },
+                { "key": "processor_name", "value": "Postman Test CPU", "type": "text" },
+                { "key": "processor_cores", "value": "4", "type": "text" },
+                { "key": "processor_frequency", "value": "3.2", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/system/{{systemId}}", "host": ["{{baseUrl}}"], "path": ["system", "{{systemId}}"] }
+          }
+        },
+        {
+          "name": "⚠ HAPUS data sistem (isi id)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/system/{{systemId}}", "host": ["{{baseUrl}}"], "path": ["system", "{{systemId}}"] },
+            "description": "Menghapus permanen baris dengan id tersebut."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Network",
+      "item": [
+        {
+          "name": "Data terbaru (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/network/latest-json", "host": ["{{baseUrl}}"], "path": ["network", "latest-json"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Ada field success', () => pm.expect(pm.response.json()).to.have.property('success'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "⚠ Tambah data network",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "interface_name", "value": "ether1", "type": "text" },
+                { "key": "download_speed", "value": "4.5", "type": "text" },
+                { "key": "upload_speed", "value": "1.2", "type": "text" },
+                { "key": "packets_sent", "value": "100", "type": "text" },
+                { "key": "packets_received", "value": "200", "type": "text" },
+                { "key": "bytes_sent", "value": "1000", "type": "text" },
+                { "key": "bytes_received", "value": "2000", "type": "text" },
+                { "key": "active_connections", "value": "10", "type": "text" },
+                { "key": "established_connections", "value": "5", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/network", "host": ["{{baseUrl}}"], "path": ["network"] },
+            "description": "Menambah 1 baris ke tabel network_traffic."
+          }
+        },
+        {
+          "name": "Tambah data network — nilai negatif (harus 422)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "download_speed", "value": "-1", "type": "text" },
+                { "key": "packets_sent", "value": "abc", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/network", "host": ["{{baseUrl}}"], "path": ["network"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validasi menolak (422)', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "⚠ HAPUS data network (isi id)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/network/{{networkId}}", "host": ["{{baseUrl}}"], "path": ["network", "{{networkId}}"] },
+            "description": "Menghapus permanen baris dengan id tersebut."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "⚠ Simpan semua pengaturan",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "app_name", "value": "Postman Test", "type": "text" },
+                { "key": "ping_enabled", "value": "on", "type": "text" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/settings/save-all", "host": ["{{baseUrl}}"], "path": ["settings", "save-all"] },
+            "description": "Menimpa pengaturan. Checkbox yang tidak dikirim akan disimpan sebagai 'false'."
+          }
+        }
+      ]
+    }
+  ]
+}
