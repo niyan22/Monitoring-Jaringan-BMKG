@@ -6,12 +6,12 @@
 <div class="dashboard-container">
 
     {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
             <h6 class="text-muted mb-0">Selamat Datang {{ Auth::user()->name }} 👋</h6>
             <h2 class="fw-bold mb-0">Dashboard</h2>
         </div>
-        <div class="text-end d-flex align-items-center gap-3">
+        <div class="d-flex flex-wrap align-items-center column-gap-3 row-gap-1">
             <div class="d-flex align-items-center gap-2">
                 <div class="live-dot" id="live-dot"></div>
                 <small class="text-muted fw-semibold" id="last-updated-text">
@@ -25,7 +25,7 @@
     {{-- CPU & RAM Donut Charts --}}
     <div class="row g-3 mb-4">
         {{-- CPU Load --}}
-        <div class="col-md-6">
+        <div class="col-12 col-sm-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h6 class="card-title text-muted fw-semibold mb-3">
@@ -48,7 +48,7 @@
         </div>
 
         {{-- RAM Load --}}
-        <div class="col-md-6">
+        <div class="col-12 col-sm-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h6 class="card-title text-muted fw-semibold mb-3">
@@ -81,7 +81,7 @@
 
     {{-- Stats Row --}}
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-12 col-sm-4">
             <div class="card border-0 shadow-sm text-center stat-card-anim" id="card-download">
                 <div class="card-body py-3">
                     <h6 class="text-muted mb-1"><i class="bi bi-arrow-down-circle text-primary me-1"></i>Download Speed</h6>
@@ -92,7 +92,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-12 col-sm-4">
             <div class="card border-0 shadow-sm text-center stat-card-anim" id="card-upload">
                 <div class="card-body py-3">
                     <h6 class="text-muted mb-1"><i class="bi bi-arrow-up-circle text-success me-1"></i>Upload Speed</h6>
@@ -103,7 +103,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-12 col-sm-4">
             <div class="card border-0 shadow-sm text-center stat-card-anim" id="card-memory">
                 <div class="card-body py-3">
                     <h6 class="text-muted mb-1"><i class="bi bi-hdd text-warning me-1"></i>AVG Memory</h6>
@@ -122,7 +122,7 @@
 
     {{-- Network Traffic Chart --}}
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 pt-3 d-flex align-items-center justify-content-between">
+        <div class="card-header bg-white border-0 pt-3 d-flex flex-wrap align-items-center justify-content-between gap-1">
             <h6 class="mb-0 fw-bold">
                 <i class="bi bi-graph-up me-2 text-primary"></i>Network Traffic
             </h6>
@@ -131,7 +131,9 @@
             </small>
         </div>
         <div class="card-body">
-            <canvas id="trafficChart" style="max-height: 300px;"></canvas>
+            <div class="chart-traffic-wrap">
+                <canvas id="trafficChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -169,6 +171,15 @@
     position: relative;
     width: 160px;
     height: 160px;
+}
+@media (max-width: 575.98px) {
+    .chart-donut-wrap { width: 140px; height: 140px; }
+}
+
+/* Grafik trafik: tinggi mengikuti lebar layar agar tetap terbaca di HP */
+.chart-traffic-wrap {
+    position: relative;
+    height: clamp(220px, 45vw, 300px);
 }
 .chart-center-label {
     position: absolute;
@@ -238,7 +249,7 @@ function buildTrafficChart(labels, download, upload) {
             ]
         },
         options: {
-            responsive: true, maintainAspectRatio: true,
+            responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: true, position: 'top' } },
             scales: { y: { beginAtZero: true, ticks: { callback: v => v + ' Mbps' } } }
         }

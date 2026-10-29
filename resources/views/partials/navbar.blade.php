@@ -1,6 +1,7 @@
 <nav class="navbar">
     <div class="container-fluid d-flex align-items-center justify-content-between">
-        <button id="toggleSidebar" class="btn btn-light" type="button" title="Toggle Sidebar">
+        <button id="toggleSidebar" class="btn btn-light" type="button" title="Toggle Sidebar"
+                aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="false">
             <i class="bi bi-list"></i>
         </button>
 
@@ -262,42 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Dark mode
-    const toggleDarkBtn = document.getElementById('toggleDark');
-    if (toggleDarkBtn) {
-        toggleDarkBtn.addEventListener('click', function() {
-            document.body.classList.toggle('dark');
-            const icon = toggleDarkBtn.querySelector('i');
-            if (document.body.classList.contains('dark')) {
-                icon.classList.remove('bi-moon');
-                icon.classList.add('bi-sun');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                icon.classList.remove('bi-sun');
-                icon.classList.add('bi-moon');
-                localStorage.setItem('darkMode', 'disabled');
-            }
-        });
-
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark');
-            toggleDarkBtn.querySelector('i').classList.remove('bi-moon');
-            toggleDarkBtn.querySelector('i').classList.add('bi-sun');
-        }
-    }
-
-    // Sidebar toggle
-    const toggleSidebarBtn = document.getElementById('toggleSidebar');
-    const sidebar = document.getElementById('sidebar');
-    if (toggleSidebarBtn && sidebar) {
-        toggleSidebarBtn.addEventListener('click', function() {
-            sidebar.classList.toggle('collapsed');
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-        });
-
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
-            sidebar.classList.add('collapsed');
-        }
-    }
+    // Dark mode & sidebar toggle dikelola di layouts/app.blade.php (satu pemilik handler)
 });
 </script>

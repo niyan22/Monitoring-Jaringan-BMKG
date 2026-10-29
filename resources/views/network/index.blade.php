@@ -29,7 +29,7 @@
     <div class="card mb-4 border-0 shadow-sm realtime-panel">
         <div class="card-body p-0">
             {{-- Panel Header --}}
-            <div class="realtime-header d-flex align-items-center justify-content-between px-4 py-3 rounded-top">
+            <div class="realtime-header d-flex flex-wrap align-items-center justify-content-between gap-3 px-3 px-sm-4 py-3 rounded-top">
                 <div class="d-flex align-items-center gap-3">
                     <div class="vm-status-dot" id="vm-status-dot"></div>
                     <div>
@@ -43,7 +43,7 @@
                         </small>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex flex-wrap align-items-center gap-2 gap-sm-3">
                     {{-- Countdown --}}
                     <div class="text-center d-none" id="countdown-wrap">
                         <small class="text-white-50 d-block" style="font-size:10px;">Refresh berikutnya</small>
@@ -55,7 +55,7 @@
                         <label class="form-check-label text-white small fw-semibold" for="auto-refresh-toggle">Auto (30s)</label>
                     </div>
                     {{-- Fetch Button --}}
-                    <button class="btn btn-light btn-sm fw-semibold px-3" id="btn-fetch-vm" onclick="fetchAndSaveFromVM()">
+                    <button class="btn btn-light btn-sm fw-semibold px-3 text-nowrap" id="btn-fetch-vm" onclick="fetchAndSaveFromVM()">
                         <i class="bi bi-lightning-charge-fill me-1 text-warning"></i>
                         <span id="fetch-btn-text">Fetch dari VM</span>
                         <span class="spinner-border spinner-border-sm d-none ms-1" id="fetch-spinner"></span>
@@ -156,7 +156,9 @@
         </div>
         <div class="card-body">
             @if(count($chartLabels) > 0)
-                <canvas id="trafficChart" style="max-height: 300px;"></canvas>
+                <div style="position: relative; height: clamp(220px, 45vw, 300px);">
+                    <canvas id="trafficChart"></canvas>
+                </div>
             @else
                 <div class="alert alert-info mb-0">
                     <i class="bi bi-info-circle me-2"></i>Belum ada data traffic dalam 24 jam terakhir.
@@ -330,7 +332,7 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
         ]
     },
     options: {
-        responsive: true, maintainAspectRatio: true,
+        responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: true, position: 'top' } },
         scales: {
             y: {

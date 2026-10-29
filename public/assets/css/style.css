@@ -15,12 +15,6 @@ body {
 ====================== */
 .auth-container {
     display: flex;
-    gap: 70px;
-    align-items: center;
-}
-
-.auth-container {
-    display: flex;
     align-items: center;
     gap: 40px;
     position: relative;
@@ -75,6 +69,68 @@ body {
     color: #fff;
     font-weight: 600;
     cursor: pointer;
+}
+
+/* ======================
+   AUTH RESPONSIVE
+====================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.input {
+    font-size: 16px; /* cegah auto-zoom di iOS saat input difokuskan */
+}
+
+/* Tablet: logo dikecilkan supaya kartu tetap muat di samping */
+@media (max-width: 992px) {
+    .auth-container {
+        gap: 20px;
+    }
+
+    .logo {
+        right: -30px;
+    }
+
+    .logo img {
+        width: 260px;
+        height: 260px;
+    }
+
+    .auth-card {
+        width: 380px;
+    }
+}
+
+/* HP: logo di atas, kartu di bawah, lebar mengikuti layar */
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 24px 16px;
+    }
+
+    .auth-container {
+        flex-direction: column;
+        gap: 0;
+        width: 100%;
+        max-width: 420px;
+        margin: auto;
+    }
+
+    .logo {
+        right: 0;
+        margin-bottom: -40px; /* logo menumpuk sedikit di atas kartu */
+    }
+
+    .logo img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .auth-card {
+        width: 100%;
+        padding: 56px 24px 28px;
+    }
 }
 
 /* ======================

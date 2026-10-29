@@ -63,6 +63,7 @@
             left: 0;
             top: 0;
             height: 100vh;
+            height: 100dvh;
             padding: 1.5rem;
             overflow-y: auto;
             z-index: 999;
@@ -202,6 +203,7 @@
         /* Main Wrapper */
         .main-wrapper {
             flex: 1;
+            min-width: 0; /* cegah konten lebar mendorong halaman keluar layar */
             margin-left: var(--sidebar-width);
             display: flex;
             flex-direction: column;
@@ -344,38 +346,103 @@
             background: #9ca3af;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* Backdrop drawer (hanya tampil di layar kecil) */
+        .sidebar-backdrop {
+            display: none;
+        }
+
+        /* Desktop: saat sidebar diciutkan, navbar (jika diposisikan fixed oleh app.css) ikut bergeser */
+        .sidebar.collapsed ~ .main-wrapper .navbar {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        /* Responsive: sidebar menjadi drawer di tablet & HP.
+           Selektor diberi awalan "body" agar menang atas aturan layout di app.css (Vite). */
+        @media (max-width: 991.98px) {
             :root {
-                --sidebar-width: 0;
-                --sidebar-collapsed-width: 0;
+                --sidebar-width: 0px;
+                --sidebar-collapsed-width: 0px;
             }
 
-            .sidebar {
-                transform: translateX(-100%);
+            /* Status "collapsed" milik desktop diabaikan; drawer dikontrol kelas .open */
+            body .sidebar,
+            body .sidebar.collapsed {
                 width: 260px;
+                max-width: 85vw;
                 z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                overflow-y: auto;
+                box-shadow: none;
             }
 
-            .sidebar.collapsed {
-                width: 260px;
+            body .sidebar.open {
                 transform: translateX(0);
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.25);
             }
 
-            .sidebar.collapsed .logo h6 {
+            body .sidebar.collapsed .logo h6 {
                 display: block;
             }
 
-            .sidebar.collapsed .nav-text {
+            body .sidebar.collapsed .nav-text,
+            body .sidebar.collapsed .nav-link span {
                 display: inline;
             }
 
-            .main-wrapper {
-                margin-left: 0;
+            body .sidebar.collapsed .nav-link {
+                justify-content: flex-start;
+                padding: 0.75rem 1rem;
             }
 
-            .sidebar.collapsed ~ .main-wrapper {
+            body .sidebar.collapsed .logout-section .btn {
+                padding: 0.5rem 1rem;
+            }
+
+            body .main-wrapper,
+            body .sidebar.collapsed ~ .main-wrapper {
                 margin-left: 0;
+                width: 100%;
+            }
+
+            /* Navbar menempel di atas saat scroll, selebar layar */
+            body .navbar {
+                position: sticky;
+                top: 0;
+                left: auto;
+                right: auto;
+                padding: 0.75rem 1rem;
+            }
+
+            body .main-content {
+                margin-top: 0;
+                padding: 1.25rem 1rem;
+            }
+
+            .sidebar-backdrop {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 999;
+                background: rgba(0, 0, 0, 0.45);
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+
+            body.sidebar-open .sidebar-backdrop {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            body.sidebar-open {
+                overflow: hidden;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            body .main-content {
+                padding: 1rem 0.75rem;
             }
         }
 
@@ -394,6 +461,7 @@
     <div class="flex-container">
         @auth
             @include('partials.sidebar')
+            <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
         @endauth
 
         <div class="main-wrapper">
@@ -465,14 +533,34 @@
         // Sidebar Toggle
         const toggleSidebarBtn = document.getElementById('toggleSidebar');
         const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        const mobileQuery = window.matchMedia('(max-width: 991.98px)');
 
         if (toggleSidebarBtn && sidebar) {
+            // Layar kecil: sidebar berupa drawer (kelas .open). Desktop: collapse/expand (kelas .collapsed).
+            function setDrawer(open) {
+                sidebar.classList.toggle('open', open);
+                document.body.classList.toggle('sidebar-open', open);
+                toggleSidebarBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+
             toggleSidebarBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                if (mobileQuery.matches) {
+                    setDrawer(!sidebar.classList.contains('open'));
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                }
             });
 
-            // Check if sidebar was previously collapsed
+            if (sidebarBackdrop) {
+                sidebarBackdrop.addEventListener('click', () => setDrawer(false));
+            }
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') setDrawer(false); });
+            sidebar.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', () => setDrawer(false)));
+            mobileQuery.addEventListener('change', () => setDrawer(false));
+
+            // Check if sidebar was previously collapsed (hanya berpengaruh di desktop)
             if (localStorage.getItem('sidebarCollapsed') === 'true') {
                 sidebar.classList.add('collapsed');
             }
