@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ $appSettings['language'] ?? str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Dashboard')</title>
+    <title>@yield('title', 'Dashboard') — {{ $appSettings['app_name'] ?? config('app.name') }}</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -170,6 +170,18 @@
         .sidebar.collapsed .nav-link {
             justify-content: center;
             padding: 0.75rem;
+        }
+
+        /* Menu selalu satu kolom: tanpa ini .nav (flex-wrap dari Bootstrap) memindahkan
+           item terakhir ke kolom kedua saat layar pendek, dan memunculkan scrollbar horizontal. */
+        body .sidebar .nav {
+            flex-wrap: nowrap;
+            align-items: stretch;
+            overflow-x: hidden;
+        }
+
+        body .sidebar .nav-item {
+            width: 100%;
         }
 
         .logout-section {
@@ -522,8 +534,18 @@
                 }
             });
 
-            // Check if dark mode was previously enabled
-            if (localStorage.getItem('darkMode') === 'enabled') {
+            // Tema awal: pilihan tombol dark mode (di browser ini) lebih diutamakan;
+            // jika belum pernah memilih, ikuti tema dari halaman Settings (light/dark/auto).
+            @if (session('theme_reset'))
+                localStorage.removeItem('darkMode'); // tema baru dari Settings menggantikan pilihan lama
+            @endif
+            const serverTheme = @json($appSettings['theme'] ?? 'light');
+            const storedDark = localStorage.getItem('darkMode');
+            const useDark = storedDark !== null
+                ? storedDark === 'enabled'
+                : (serverTheme === 'dark' || (serverTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches));
+
+            if (useDark) {
                 document.body.classList.add('dark-mode');
                 toggleDarkBtn.querySelector('i').classList.remove('bi-moon');
                 toggleDarkBtn.querySelector('i').classList.add('bi-sun');

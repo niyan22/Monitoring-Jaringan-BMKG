@@ -147,7 +147,7 @@
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Polling Interval (seconds)</label>
-                                    <input type="number" class="form-control" name="polling_interval" value="{{ \App\Models\Setting::getSetting('polling_interval', '60') }}" min="10" max="3600">
+                                    <input type="number" class="form-control" name="polling_interval" value="{{ \App\Models\Setting::getSetting('polling_interval', '30') }}" min="10" max="3600">
                                 </div>
 
                                 <div class="mb-3">
@@ -350,4 +350,21 @@
         background-color: rgba(0, 0, 0, 0.02) !important;
     }
 </style>
+
+<script>
+// Ingat tab yang sedang dibuka agar setelah "Save" halaman tidak kembali ke General Settings.
+document.addEventListener('DOMContentLoaded', () => {
+    const KEY = 'settingsActiveTab';
+    const tabs = document.querySelectorAll('.list-group-item[data-bs-toggle="list"]');
+
+    tabs.forEach(tab => tab.addEventListener('shown.bs.tab', () => {
+        try { sessionStorage.setItem(KEY, tab.getAttribute('href')); } catch (e) {}
+    }));
+
+    let saved = null;
+    try { saved = sessionStorage.getItem(KEY); } catch (e) {}
+    const target = saved ? document.querySelector('.list-group-item[href="' + saved + '"]') : null;
+    if (target) bootstrap.Tab.getOrCreateInstance(target).show();
+});
+</script>
 @endsection

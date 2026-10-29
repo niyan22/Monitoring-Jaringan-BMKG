@@ -43,11 +43,11 @@
                 <div class="d-flex align-items-center gap-3 flex-wrap">
                     <div class="text-center d-none" id="countdown-wrap">
                         <small class="text-white-50 d-block" style="font-size:10px;">Refresh berikutnya</small>
-                        <span class="badge bg-white text-dark fw-bold" id="countdown-badge">30s</span>
+                        <span class="badge bg-white text-dark fw-bold" id="countdown-badge">{{ (int) ($appSettings['polling_interval'] ?? 30) }}s</span>
                     </div>
                     <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
                         <input class="form-check-input" type="checkbox" id="auto-refresh-toggle" style="width:2.5em;height:1.3em;cursor:pointer;">
-                        <label class="form-check-label text-white small fw-semibold" for="auto-refresh-toggle">Auto (30s)</label>
+                        <label class="form-check-label text-white small fw-semibold" for="auto-refresh-toggle">Auto ({{ (int) ($appSettings['polling_interval'] ?? 30) }}s)</label>
                     </div>
                     <button class="btn btn-light btn-sm fw-semibold px-3" id="btn-fetch-vm" onclick="fetchAndSaveFromVM()">
                         <i class="bi bi-lightning-charge-fill me-1 text-warning"></i>
@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const CSRF_TOKEN      = '{{ csrf_token() }}';
 const AUTO_FETCH_URL  = '{{ route("system.auto-fetch") }}';
 const LATEST_JSON_URL = '{{ route("system.latest-json") }}';
-const POLL_INTERVAL   = 30;
+const POLL_INTERVAL   = {{ (int) ($appSettings['polling_interval'] ?? 30) }};
 
 let isFetching = false, countdownTimer = null, countdownSec = POLL_INTERVAL;
 

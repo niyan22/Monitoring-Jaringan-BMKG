@@ -18,7 +18,7 @@
                     {{ $latestSystem ? $latestSystem->recorded_at->format('d M Y H:i:s') : 'Belum ada data' }}
                 </small>
             </div>
-            <p class="text-muted mb-0">Monitoring Jaringan BMKG</p>
+            <p class="text-muted mb-0">{{ $appSettings['app_name'] ?? 'Monitoring Jaringan BMKG' }}@if(!empty($appSettings['location'])) · {{ $appSettings['location'] }}@endif</p>
         </div>
     </div>
 
@@ -366,9 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
     pollSystem();
     pollNetwork();
 
-    // Auto-poll setiap 30 detik mengikuti System & Network Traffic
-    setInterval(pollSystem,  30000);
-    setInterval(pollNetwork, 30000);
+    // Auto-poll mengikuti "Polling Interval" di halaman Settings (detik)
+    const POLL_MS = {{ (int) ($appSettings['polling_interval'] ?? 30) }} * 1000;
+    setInterval(pollSystem,  POLL_MS);
+    setInterval(pollNetwork, POLL_MS);
 });
 </script>
 

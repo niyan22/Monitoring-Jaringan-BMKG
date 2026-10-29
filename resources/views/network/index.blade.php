@@ -47,12 +47,12 @@
                     {{-- Countdown --}}
                     <div class="text-center d-none" id="countdown-wrap">
                         <small class="text-white-50 d-block" style="font-size:10px;">Refresh berikutnya</small>
-                        <span class="badge bg-white text-dark fw-bold" id="countdown-badge">30s</span>
+                        <span class="badge bg-white text-dark fw-bold" id="countdown-badge">{{ (int) ($appSettings['polling_interval'] ?? 30) }}s</span>
                     </div>
                     {{-- Auto Refresh Toggle --}}
                     <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
                         <input class="form-check-input" type="checkbox" id="auto-refresh-toggle" style="width:2.5em;height:1.3em;cursor:pointer;">
-                        <label class="form-check-label text-white small fw-semibold" for="auto-refresh-toggle">Auto (30s)</label>
+                        <label class="form-check-label text-white small fw-semibold" for="auto-refresh-toggle">Auto ({{ (int) ($appSettings['polling_interval'] ?? 30) }}s)</label>
                     </div>
                     {{-- Fetch Button --}}
                     <button class="btn btn-light btn-sm fw-semibold px-3 text-nowrap" id="btn-fetch-vm" onclick="fetchAndSaveFromVM()">
@@ -350,7 +350,7 @@ const trafficChart = new Chart(document.getElementById('trafficChart'), {
 const CSRF_TOKEN = '{{ csrf_token() }}';
 const AUTO_FETCH_URL  = '{{ route("network.auto-fetch") }}';
 const LATEST_JSON_URL = '{{ route("network.latest-json") }}';
-const POLL_INTERVAL   = 30; // detik
+const POLL_INTERVAL   = {{ (int) ($appSettings['polling_interval'] ?? 30) }}; // detik
 
 let autoTimer   = null;
 let countdownTimer = null;

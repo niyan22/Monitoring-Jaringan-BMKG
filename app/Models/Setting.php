@@ -22,7 +22,10 @@ class Setting extends Model
     public static function getSetting($key, $default = null)
     {
         $setting = self::where('setting_key', $key)->first();
-        return $setting?->setting_value ?? $default;
+
+        // Default hanya dipakai jika pengaturan belum pernah disimpan. Nilai kosong
+        // yang sengaja disimpan user tetap kosong (bukan kembali ke default).
+        return $setting ? ($setting->setting_value ?? '') : $default;
     }
 
     /**

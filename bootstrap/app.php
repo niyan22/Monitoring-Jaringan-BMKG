@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
         ]);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\ApplyAppSettings::class,
+        ]);
+
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('dashboard'));
     })

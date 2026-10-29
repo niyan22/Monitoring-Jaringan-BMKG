@@ -88,6 +88,21 @@ class SettingsController extends Controller
      */
     public function saveAll(Request $request): RedirectResponse
     {
+        $request->validate([
+            'app_name'         => 'sometimes|nullable|string|max:100',
+            'location'         => 'sometimes|nullable|string|max:100',
+            'timezone'         => 'sometimes|nullable|string|in:Asia/Jakarta,Asia/Bangkok,Asia/Singapore,Asia/Tokyo',
+            'language'         => 'sometimes|nullable|string|in:id,en,zh',
+            'theme'            => 'sometimes|nullable|string|in:light,dark,auto',
+            'polling_interval' => 'sometimes|nullable|integer|min:10|max:3600',
+            'timeout'          => 'sometimes|nullable|integer|min:1|max:60',
+            'retries'          => 'sometimes|nullable|integer|min:1|max:10',
+            'data_retention'   => 'sometimes|nullable|in:7,30,90',
+            'alert_email'      => 'sometimes|nullable|email|max:255',
+            'telegram_token'   => 'sometimes|nullable|string|max:255',
+            'telegram_chat_id' => 'sometimes|nullable|string|max:100',
+        ]);
+
         // Save General Settings
         if ($request->has('app_name')) {
             Setting::setSetting('app_name', $request->app_name, 'general', 'Application Name');
@@ -179,6 +194,9 @@ class SettingsController extends Controller
             Setting::setSetting('two_factor_auth', 'false', 'security', 'Two Factor Authentication');
         }
 
-        return redirect()->route('settings.index')->with('success', 'Semua pengaturan berhasil disimpan');
+        // Tema yang baru disimpan menggantikan pilihan tombol dark mode di browser
+        return redirect()->route('settings.index')
+            ->with('success', 'Semua pengaturan berhasil disimpan')
+            ->with('theme_reset', $request->has('theme'));
     }
 }
